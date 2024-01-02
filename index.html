@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird Game</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="flappyBirdCanvas" width="480" height="320"></canvas>
+    <script>
+        const canvas = document.getElementById("flappyBirdCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let bird = {
+            x: 50,
+            y: canvas.height / 2 - 15,
+            width: 30,
+            height: 30,
+            color: "#FF5733",
+            gravity: 1.5,
+            velocity: 0,
+            jump: -15
+        };
+
+        let pipes = [];
+        let score = 0;
+
+        function drawBird() {
+            ctx.fillStyle = bird.color;
+            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+        }
+
+        function drawPipe(pipeX, openingY) {
+            const pipeWidth = 50;
+            const pipeHeight = canvas.height - openingY;
+            ctx.fillStyle = "#5F4B8B";
+            ctx.fillRect(pipeX, openingY, pipeWidth, pipeHeight);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update bird position
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+
+            // Draw bird
+            drawBird();
+
+            // Generate pipes
+            if (Math.random() < 0.02) {
+                const openingY = Math.random() * (canvas.height - 100);
+                pipes.push({ x: canvas.width, openingY });
+            }
+
+            // Draw pipes
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= 2;
+                drawPipe(pipes[i].x, pipes[i].openingY);
+
+                // Check collision with bird
+                if (
+                    bird.x < pipes[i].x + 50 &&
+                    bird.x + bird.width > pipes[i].x &&
+                    (bird.y < pipes[i].openingY || bird.y + bird.height > pipes[i].openingY + 100)
+                ) {
+                    alert("Game Over! Your score: " + score);
+                    bird.y = canvas.height / 2 - 15;
+                    pipes = [];
+                    score = 0;
+                }
+
+                // Remove pipes that are off-screen
+                if (pipes[i].x < -50) {
+                    pipes.splice(i, 1);
+                    score++;
+                }
+            }
+
+            // Check if bird hits top or bottom of the canvas
+            if (bird.y < 0 || bird.y + bird.height > canvas.height) {
+                alert("Game Over! Your score: " + score);
+                bird.y = canvas.height / 2 - 15;
+                pipes = [];
+                score = 0;
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.code === "Space") {
+                bird.velocity = bird.jump;
+            }
+        });
+
+        draw();
+    </script>
+</body>
+</html>
