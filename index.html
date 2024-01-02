@@ -9,6 +9,7 @@
             border: 1px solid #000;
             display: block;
             margin: 20px auto;
+            background-color: #87CEEB;
         }
     </style>
 </head>
@@ -21,7 +22,7 @@
         let bird = {
             x: 50,
             y: canvas.height / 2 - 15,
-            width: 30,
+            width: 40,
             height: 30,
             color: "#FF5733",
             gravity: 1.5,
@@ -33,15 +34,16 @@
         let score = 0;
 
         function drawBird() {
-            ctx.fillStyle = bird.color;
-            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+            const birdImage = new Image();
+            birdImage.src = 'bird.png'; // Include a bird image for better visuals
+            ctx.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
         }
 
         function drawPipe(pipeX, openingY) {
-            const pipeWidth = 50;
-            const pipeHeight = canvas.height - openingY;
-            ctx.fillStyle = "#5F4B8B";
-            ctx.fillRect(pipeX, openingY, pipeWidth, pipeHeight);
+            const pipeImage = new Image();
+            pipeImage.src = 'pipe.png'; // Include a pipe image for better visuals
+            ctx.drawImage(pipeImage, pipeX, 0, 50, openingY);
+            ctx.drawImage(pipeImage, pipeX, openingY + 100, 50, canvas.height - openingY - 100);
         }
 
         function draw() {
@@ -56,7 +58,7 @@
 
             // Generate pipes
             if (Math.random() < 0.02) {
-                const openingY = Math.random() * (canvas.height - 100);
+                const openingY = Math.random() * (canvas.height - 150) + 50;
                 pipes.push({ x: canvas.width, openingY });
             }
 
@@ -72,9 +74,7 @@
                     (bird.y < pipes[i].openingY || bird.y + bird.height > pipes[i].openingY + 100)
                 ) {
                     alert("Game Over! Your score: " + score);
-                    bird.y = canvas.height / 2 - 15;
-                    pipes = [];
-                    score = 0;
+                    resetGame();
                 }
 
                 // Remove pipes that are off-screen
@@ -87,16 +87,25 @@
             // Check if bird hits top or bottom of the canvas
             if (bird.y < 0 || bird.y + bird.height > canvas.height) {
                 alert("Game Over! Your score: " + score);
-                bird.y = canvas.height / 2 - 15;
-                pipes = [];
-                score = 0;
+                resetGame();
             }
+
+            // Display score
+            ctx.fillStyle = "#000";
+            ctx.font = "20px Arial";
+            ctx.fillText("Score: " + score, 10, 30);
 
             requestAnimationFrame(draw);
         }
 
+        function resetGame() {
+            bird.y = canvas.height / 2 - 15;
+            pipes = [];
+            score = 0;
+        }
+
         document.addEventListener("keydown", function (event) {
-            if (event.code === "Space") {
+            if (event.code === "Space" && bird.y > 0) {
                 bird.velocity = bird.jump;
             }
         });
